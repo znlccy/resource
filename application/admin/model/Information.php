@@ -3,12 +3,13 @@
  * Created by PhpStorm.
  * User: Administrator
  * Date: 2018/8/15
- * Time: 12:03
- * Comment: 权限模型
+ * Time: 13:35
+ * Comment: 通知消息模型
  */
+
 namespace app\admin\model;
 
-class Permission extends BasisModel {
+class Information extends BasisModel {
 
     /**
      * 自动写入和读取时间
@@ -20,6 +21,6 @@ class Permission extends BasisModel {
      * 关联的数据表
      * @var string
      */
-    protected $table = 'tb_permission';
+    protected $table = 'tb_information';
 
 }
