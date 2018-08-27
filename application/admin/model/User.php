@@ -17,8 +17,16 @@ class User extends BasisModel {
      */
     protected $autoWriteTimestamp = 'datetime';
 
+    /**
+     * 创建时间
+     * @var string
+     */
     protected $createTime = 'create_time';
 
+    /**
+     * 更新时间
+     * @var string
+     */
     protected $updateTime = 'update_time';
 
     /**
