@@ -2,14 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: Administrator
- * Date: 2018/8/27
- * Time: 16:43
- * Comment: 入驻项目模型
+ * Date: 2018/8/28
+ * Time: 18:45
+ * Comment: 加速器申请模型
  */
 
-namespace app\admin\model;
+namespace app\index\model;
 
-class Admission extends BasisModel {
+class Admission extends BasicModel {
 
     /**
      * @var string
@@ -20,5 +20,4 @@ class Admission extends BasisModel {
      * @var string
      */
     protected $table = 'tb_admission';
-
 }

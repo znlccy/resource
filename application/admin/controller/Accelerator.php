@@ -312,7 +312,7 @@ class Accelerator extends BasisController {
     }
 
     /**
-     * 服务资源下拉列表api接口
+     * 加速器资源下拉列表api接口
      */
     public function spinner() {
         //获取数据库数据

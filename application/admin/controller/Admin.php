@@ -515,13 +515,13 @@ class Admin extends BasisController {
         if ($id) {
             $admin_data = $this->admin_model->where('id', $id)->find();
             return json([
-                'return'        => '200',
+                'code'          => '200',
                 'message'       => '查询数据成功',
                 'data'          => $admin_data
             ]);
         } else {
             return json([
-                'return'        => '404',
+                'code'          => '404',
                 'message'       => '查询数据失败',
             ]);
         }

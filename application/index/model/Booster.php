@@ -2,13 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: Administrator
- * Date: 2018/8/15
- * Time: 12:03
- * Comment: 管理员角色模型
+ * Date: 2018/8/28
+ * Time: 19:08
+ * Coment: 入驻申请模型
  */
-namespace app\admin\model;
 
-class AdminRole extends BasisModel {
+namespace app\index\model;
+
+class Booster extends BasicModel {
 
     /**
      * 自动写入读取时间
@@ -20,6 +21,5 @@ class AdminRole extends BasisModel {
      * 关联的数据表
      * @var string
      */
-    protected $table = 'tb_admin_role';
-
+    protected $table = 'tb_booster';
 }
