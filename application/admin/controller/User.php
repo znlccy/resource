@@ -65,48 +65,111 @@ class User extends BasisController {
      * 联盟成员添加和更新api接口
      */
     public function create() {
-
-        //获取客户端提交过来的数据
         $id = request()->param('id');
         $mobile = request()->param('mobile');
         $password = request()->param('password');
         $confirm_pass = request()->param('confirm_pass');
+        $username = request()->param('username');
+        $email = request()->param('email');
+        $company = request()->param('company');
+        $career = request()->param('career');
+        $status = request()->param('status');
+        $occupation = request()->param('occupation');
 
         //验证数据
         $validate_data = [
             'id'            => $id,
             'mobile'        => $mobile,
             'password'      => $password,
-            'confirm_pass'  => $confirm_pass
+            'confirm_pass'  => $confirm_pass,
+            'username'      => $username,
+            'email'         => $email,
+            'status'        => $status,
+            'company'       => $company,
+            'career'        => $career,
+            'occupation'    => $occupation
         ];
 
         //验证结果
-        $result = $this->user_validate->scene('create')->check($validate_data);
-        if (!$result) {
-            return json([
-                'code'      => '401',
-                'message'   => $this->user_validate->getError()
-            ]);
+        if (empty($id)){
+            $result   = $this->user_validate->scene('create')->check($validate_data);
+            if (!$result) {
+                return json(['code' => '401', 'message' => $this->user_validate->getError()]);
+            }
+        } else {
+            $validate_data = [
+                'id'            => $id,
+                'username'      => $username,
+                'email'         => $email,
+                'company'       => $company,
+                'career'        => $career,
+                'status'        => $status,
+                'occupation'    => $occupation
+            ];
+            $result   = $this->user_validate->scene('update')->check($validate_data);
+            if (!$result) {
+                return json(['code' => '401', 'message' => $this->user_validate->getError()]);
+            }
         }
 
-        //插入数据
-        $operator_data = [
-            'id'            => $id,
-            'mobile'        => $mobile,
-            'password'      => md5($password)
+        $insert_data = [
+            'username'      => $username,
+            'email'         => $email,
+            'company'       => $company,
+            'career'        => $career,
+            'status'        => $status,
+            'occupation'    => $occupation,
         ];
 
-        //返回数据
-        if (empty($id)) {
-            $operator_result = $this->user_model->save($operator_data);
-        } else {
-            $operator_result = $this->user_model->save($operator_data, ['id' => $id]);
+        if (empty($id)){
+            $data_add = [
+                'register_time' => date('Y-m-d H:i:s'),
+                'mobile'        => $mobile,
+                'password'      => md5($password)
+            ];
+            $insert_data = array_merge($insert_data, $data_add);
+        }else{
+            if (!empty($password) && !empty($confirm_pass)){
+                $insert_data = [
+                    'username'      => $username,
+                    'email'         => $email,
+                    'company'       => $company,
+                    'career'        => $career,
+                    'occupation'    => $occupation,
+                ];
+            }
         }
-        if ($operator_result) {
-            return json([
-                'code'      => '200',
-                'message'   => '数据操作成功'
-            ]);
+
+        if (!empty($id)) {
+
+            $update_result = $this->user_model->where('id','=', $id)->update($insert_data);
+
+            if ($update_result) {
+                return json([
+                    'code'      => '200',
+                    'message'   => '更新用户成功'
+                ]);
+            }else{
+                return json([
+                    'code'      => '404',
+                    'message'   => '更新用户失败'
+                ]);
+            }
+        } else {
+            $insert_result = $this->user_model->insertGetId($insert_data);
+
+            if ($insert_result) {
+                return json([
+                    'code'      => '200',
+                    'message'   => '添加用户成功',
+                    'id'        => $insert_result
+                ]);
+            }else{
+                return json([
+                    'code'      => '404',
+                    'message'   => '添加用户失败'
+                ]);
+            }
         }
 
     }

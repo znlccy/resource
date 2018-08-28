@@ -13,6 +13,10 @@ use app\index\controller\BasicController;
 
 class Image extends BasicController {
 
+    /**
+     * 富文本图片上传接口
+     * @return \think\response\Json
+     */
     public function upload(){
 
         $picture = request()->file('picture');

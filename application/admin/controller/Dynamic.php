@@ -300,7 +300,6 @@ class Dynamic extends BasisController {
                 'message'   => '删除数据失败'
             ]);
         }
-
     }
 
     /**

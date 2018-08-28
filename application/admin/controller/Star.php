@@ -9,6 +9,8 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\Star as StarModel;
+use app\admin\validate\Star as StarValidate;
 use think\Request;
 
 class Star extends BasisController {
@@ -23,7 +25,7 @@ class Star extends BasisController {
      * 声明明星验证器
      * @var
      */
-    protected $start_validate;
+    protected $star_validate;
 
     /**
      * @var
@@ -36,25 +38,100 @@ class Star extends BasisController {
      */
     public function __construct(Request $request = null) {
         parent::__construct($request);
+        $this->star_model = new StarModel();
+        $this->star_validate = new StarValidate();
+        $this->star_page = config('pagination');
     }
 
     public function entry() {
 
+        //获取客户端提交过来的数据
+        $id = request()->param('id');
+        $name = request()->param('name');
+        $introduce = request()->param('introduce');
+        $create_start = request()->param('create_start');
+        $create_end = request()->param('create_end');
+        $update_start = request()->param('update_start');
+        $update_end = request()->param('update_end');
+        $sort = request()->param('sort');
+        $status = request()->param('status');
+        $page_size = request()->param('page_size', $this->star_page['PAGE_SIZE']);
+        $jump_page = request()->param('jump_page', $this->star_page['JUMP_PAGE']);
+
+        //验证数据
+        $validate_data = [
+            'id'            => $id,
+            'name'          => $name,
+            'introduce'     => $introduce,
+            'create_start'  => $create_start,
+            'create_end'    => $create_end,
+            'update_start'  => $update_start,
+            'update_end'    => $update_end,
+            'sort'          => $sort,
+            'status'        => $status,
+            'page_size'     => $page_size,
+            'jump_page'     => $jump_page
+        ];
+
+        //验证结果
+        $result = $this->star_validate->scene('entry')->check($validate_data);
+        if (!$result) {
+            return json([
+                'code'      => '401',
+                'message'   => $this->star_validate->getError()
+            ]);
+        }
+
+        //条件筛选
+        $conditions = [];
+
+        if ($id) {
+            $conditions['id'] = $id;
+        }
+        if ($name) {
+            $conditions['name'] = ['like', '%' . $name . '%'];
+        }
+        if ($introduce) {
+            $conditions['introduce'] = ['like', '%' . $introduce . '%'];
+        }
+        if ($create_start && $create_end) {
+            $conditions['create_time'] = ['between time', [$create_start, $create_end]];
+        }
+        if ($update_start && $update_end) {
+            $conditions['update_time'] = ['between time', [$update_start, $update_end]];
+        }
+        if ($status || $status === 0) {
+            $conditions['status'] = $status;
+        }
+        if ($sort || $sort === 0) {
+            $conditions['sort'] = $sort;
+        }
+
+        //返回数据
+        $star = $this->star_model->where($conditions)
+            ->order('sort', 'desc')
+            ->order('id', 'desc')
+            ->paginate($page_size, false, ['page' => $jump_page]);
+
+        return json([
+            'code'      => '200',
+            'message'   => '获取明星项目列表成功',
+            'data'      => $star
+        ]);
     }
 
+    /**
+     * 明星项目添加更新api接口
+     * @return \think\response\Json
+     */
     public function save() {
         /* 获取前端提交的数据 */
         $id           = request()->param('id');
-        $title        = request()->param('title');
-        $description  = request()->param('description');
+        $name         = request()->param('name');
+        $introduce    = request()->param('introduce');
         $picture      = request()->file('picture');
-        $column_id    = request()->param('column_id');
-        $recommend    = request()->param('recommend', 0);
-        $publish_time = date('Y-m-d H:i:s', time());
-        $status       = request()->param('status', 0);
-        $rich_text    = request()->param('rich_text');
-        $admin        = Session::get('admin');
-        $publisher    = $admin['mobile'];
+        $status       = request()->param('status', 1);
+        $sort         = request()->param('sort');
 
         // 移动图片到框架应用根目录/public/images
         if ($picture) {
@@ -70,32 +147,28 @@ class Star extends BasisController {
         //验证数据
         $validate_data = [
             'id'            => $id,
-            'title'         => $title,
-            'description'   => $description,
+            'name'          => $name,
+            'introduce'     => $introduce,
             'picture'       => $picture,
-            'column_id'     => $column_id,
-            'recommend'     => $recommend,
-            'publish_time'  => $publish_time,
             'status'        => $status,
-            'publisher'     => $publisher,
-            'rich_text'     => $rich_text
+            'sort'          => $sort
         ];
 
         //验证结果
-        $result = $this->dynamic_validate->scene('save')->check($validate_data);
+        $result = $this->star_validate->scene('save')->check($validate_data);
         if (!$result) {
             return json([
                 'code'      => '401',
-                'message'   => $this->dynamic_validate->getError()
+                'message'   => $this->star_validate->getError()
             ]);
         }
         if (empty($id)) {
-            $result  = $this->dynamic_model->save($validate_data);
+            $result  = $this->star_model->save($validate_data);
         } else {
             if (empty($picture)) {
                 unset($validate_data['picture']);
             }
-            $result  = $this->dynamic_model->save($validate_data, ['id' => $id]);
+            $result  = $this->star_model->save($validate_data, ['id' => $id]);
         }
         if ($result) {
             $data = ['code' => '200', 'message' => '保存成功!'];
@@ -106,11 +179,80 @@ class Star extends BasisController {
         }
     }
 
+    /**
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function detail() {
+        //获取客户端提交的数据
+        $id = request()->param('id');
 
+        //验证数据
+        $validate_data = [
+            'id'            => $id
+        ];
+
+        //验证结果
+        $result = $this->star_validate->scene('detail')->check($validate_data);
+        if (!$result) {
+            return json([
+                'code'      => '401',
+                'message'   => $this->star_validate->getError()
+            ]);
+        }
+
+        //返回数据
+        $star = $this->star_model->where('id', $id)->find();
+        if ($star) {
+            return json([
+                'code'      => '200',
+                'message'   => '查询数据成功',
+                'data'      => $star
+            ]);
+        } else {
+            return json([
+                'code'      => '404',
+                'message'   => '查询数据失败,数据不存在'
+            ]);
+        }
     }
 
+    /**
+     * 删除明星项目api接口
+     * @return \think\response\Json
+     */
     public function delete() {
+        //获取客户端提交过来的数据
+        $id = request()->param('id');
 
+        //验证数据
+        $validate_data = [
+            'id'            => $id
+        ];
+
+        //验证结果
+        $result = $this->star_validate->scene('delete')->check($validate_data);
+        if (!$result) {
+            return json([
+                'code'      => '401',
+                'message'   => $this->star_validate->getError()
+            ]);
+        }
+
+        //返回结果
+        $delete = $this->star_model->where('id', $id)->delete();
+        if ($delete) {
+            return json([
+                'code'      => '200',
+                'message'   => '删除数据成功'
+            ]);
+        } else {
+            return json([
+                'code'      => '401',
+                'message'   => '删除数据失败'
+            ]);
+        }
     }
 }
