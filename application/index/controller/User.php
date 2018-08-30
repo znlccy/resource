@@ -9,12 +9,13 @@
 namespace app\index\controller;
 
 use app\index\model\User as UserModel;
+use app\index\model\UserAccelerator;
 use app\index\validate\User as UserValidate;
 use app\index\model\Sms as SmsModel;
 use app\index\model\UserInformation as UserInformationModel;
 use app\index\model\Information as InformationModel;
-use app\index\model\UserActivity as UserActivityModel;
-use app\index\model\Activity as ActivityModel;
+use app\index\model\UserAccelerator as UserAcceleratorModel;
+use app\index\model\Accelerator as AcceleratorModel;
 use app\index\model\Group as GroupModel;
 use app\index\model\UserGroup as UserGroupModel;
 use think\Request;
@@ -44,7 +45,7 @@ class User extends BasicController {
      * 声明用户活动模型
      * @var
      */
-    protected $user_activity_model;
+    protected $user_accelerator_model;
 
     /**
      * 声明消息模型
@@ -56,7 +57,7 @@ class User extends BasicController {
      * 声明活动模型
      * @var
      */
-    protected $activity_model;
+    protected $accelerator_model;
 
     /**
      * @var
@@ -91,8 +92,8 @@ class User extends BasicController {
         $this->sms_model = new SmsModel();
         $this->user_info_model = new UserInformationModel();
         $this->information_model = new InformationModel();
-        $this->user_activity_model = new UserActivityModel();
-        $this->activity_model = new ActivityModel();
+        $this->user_accelerator_model = new UserAcceleratorModel();
+        $this->accelerator_model = new AcceleratorModel();
         $this->group_model = new GroupModel();
         $this->user_group_model = new UserGroupModel();
         $this->user_page = config('pagination');
@@ -559,7 +560,7 @@ class User extends BasicController {
     }
 
     /**
-     * 已经报名活动api接口
+     * 已经报名加速器api接口
      */
     public function apply() {
 
@@ -582,11 +583,11 @@ class User extends BasicController {
             return json(['code' => '401', 'message' => $this->user_validate->getError()]);
         }
 
-        $data = $this->user_activity_model
+        $data = $this->user_accelerator_model
             ->alias('ua')
             ->where('user_id', '=', $user_id)
-            ->join('tb_activity a', 'ua.activity_id = a.id')
-            ->field('ua.register_time, ua.status, a.title, a.apply_time, a.id')
+            ->join('tb_accelerator a', 'ua.accelerator_id = a.id')
+            ->field('ua.register_time, ua.status, a.title, a.register_time, a.id')
             ->paginate($page_size, false, ['page' => $jump_page]);
 
         return json(['code' => '200', 'message' => '读取成功', 'data' => $data]);
@@ -615,22 +616,22 @@ class User extends BasicController {
         }
 
         //确认是否报名
-        $user_active = $this->user_activity_model
+        $user_active = $this->user_accelerator_model
             -> where('user_id', '=', $user_id)
-            -> where('activity_id', '=', $id)
+            -> where('accelerator_id', '=', $id)
             -> select();
 
         if ( empty($user_active) ){
             return json(['code' => '401', 'message' => '未报名']);
         }
 
-        $result = $this->user_activity_model
+        $result = $this->user_accelerator_model
             -> where('user_id', '=', $user_id)
-            -> where('activity_id', '=', $id)
+            -> where('accelerator_id', '=', $id)
             -> delete();
         if ($result) {
             // 活动人数-1
-            $this->activity_model->where(['id' => $id])->setDec('register');
+            $this->accelerator_model->where(['id' => $id])->setDec('register');
             return json(['code' => '200', 'message' => '提交成功']);
         } else {
             return json(['code' => '404', 'message' => '报名失败']);

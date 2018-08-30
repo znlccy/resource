@@ -229,14 +229,23 @@ class Admin extends BasisController {
         if ($mobile) {
             $conditions['mobile'] = $mobile;
         }
-        if ($status || $status === 0) {
-            $conditions['status'] = $status;
+        if (is_null($status)) {
+            $conditions['status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['status'] = $status;
+                    break;
+                case 1:
+                    $conditions['status'] = $status;
+                    break;
+                default:
+                    break;
+            }
         }
-
         if ($real_name) {
             $conditions['real_name'] = ['like', '%' . $real_name . '%'];
         }
-
         if ($register_start && $register_end) {
             $conditions['create_time'] = ['between time', [$register_start, $register_end]];
         }

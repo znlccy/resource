@@ -53,7 +53,7 @@ class Permission extends BasisValidate {
 
     //验证场景
     protected $scene = [
-        'entry'         => ['id' => 'number', 'status' => 'number', 'name' => 'max:255', 'path' => 'max:255', 'pid' => 'number', 'description' => 'max:255', 'sort' => 'number', 'level' => 'number', 'create_start' => 'date', 'create_end' => 'date', 'update_start' => 'date', 'update_end' => 'date', 'page_size' => 'number', 'jump_page' => 'number'],
+        'entry'         => ['id' => 'number', 'status' => 'number', 'name' => 'max:255', 'path' => 'max:255', 'pid' => 'number', 'description' => 'max:255', 'sort' => 'number|min:1', 'level' => 'number', 'create_start' => 'date', 'create_end' => 'date', 'update_start' => 'date', 'update_end' => 'date', 'page_size' => 'number', 'jump_page' => 'number'],
         'save'          => ['id' => 'number'],
         'detail'        => ['id' => 'require|number'],
         'delete'        => ['id' => 'require|number'],

@@ -49,7 +49,7 @@ class Star extends  BasisValidate {
     //验证场景
     protected $scene = [
         'entry'         => ['id' => 'number', 'column_id' => 'number', 'title' => 'max:255', 'description' => 'max:255', 'create_start' => 'date', 'create_end' => 'date', 'update_start' => 'date', 'update_end' => 'date', 'publish_start' => 'date', 'publish_end' => 'date', 'recommend' => 'number', 'status' => 'number', 'publisher' => 'length:11|regex:mobile', 'page_size' => 'number', 'jump_page' => 'number'],
-        'save'          => ['id' => 'number', 'name' => 'require|max:255', 'introduce' => 'require|min:200', 'picture' => 'require|image:180,80',  'sort' => 'require|number', 'status' => 'require|number'],
+        'save'          => ['id' => 'number', 'name' => 'require|max:255', 'introduce' => 'require|min:200', 'picture' => 'require|image:180,80',  'sort' => 'require|number|min:1', 'status' => 'require|number'],
         'detail'        => ['id' => 'require|number'],
         'delete'        => ['id' => 'require|number']
     ];

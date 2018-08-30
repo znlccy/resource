@@ -11,11 +11,11 @@ namespace app\index\controller;
 
 use app\index\model\Accelerator as AcceleratorModel;
 use app\index\validate\Accelerator as AcceleratorValidate;
-use app\index\model\Admission as AdmissionModel;
-use app\index\validate\Admission as AdmissionValidate;
+use app\index\model\UserAccelerator as UserAcceleratorModel;
+use think\Controller;
 use think\Request;
 
-class Accelerator extends BasicController {
+class Accelerator extends Controller {
 
     /**
      * 声明加速器模型
@@ -27,19 +27,13 @@ class Accelerator extends BasicController {
      * 声明加速器申请模型
      * @var
      */
-    protected $admission_model;
-
-    /**
-     * 声明加速器验证器
-     * @var
-     */
-    protected $accelerator_validate;
+    protected $user_accelerator_model;
 
     /**
      * 声明加速器申请验证器
      * @var
      */
-    protected $admission_validate;
+    protected $accelerator_validate;
 
     /**
      * 声明加速器分页器
@@ -55,27 +49,42 @@ class Accelerator extends BasicController {
     public function __construct(Request $request = null) {
         parent::__construct($request);
         $this->accelerator_model = new AcceleratorModel();
-        $this->admission_model = new AdmissionModel();
+        $this->user_accelerator_model = new UserAcceleratorModel();
         $this->accelerator_validate = new AcceleratorValidate();
-        $this->admission_validate = new AcceleratorValidate();
         $this->accelerator_page = config('pagination');
     }
 
     /**
-     * 获取加速器列表api接口
+     * 加速器列表api接口
      * @return \think\response\Json
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
     public function index() {
 
+        //获取客户端提交过来的数据
+        $page_size = request()->param('page_size', $this->accelerator_page['PAGE_SIZE']);
+        $jump_page = request()->param('jump_page', $this->accelerator_page['JUMP_PAGE']);
+
+        //验证数据
+        $validate_data = [
+            'page_size'     => $page_size,
+            'jump_page'     => $jump_page
+        ];
+
+        //验证结果
+        $result = $this->accelerator_validate->scene('index')->check($validate_data);
+        if (!$result) {
+            return json([
+                'code'      => '401',
+                'message'   => $this->accelerator_validate->getError()
+            ]);
+        }
+
         //返回给客户端最新的数据
         $accelerator = $this->accelerator_model
+            ->where('status = 1')
             ->order('id', 'desc')
-            ->order('create_time', 'desc')
-            ->limit(4)
-            ->select();
+            ->paginate($page_size, false, ['page' => $jump_page]);
 
         //返回给客户端数据
         if ($accelerator) {
@@ -95,67 +104,110 @@ class Accelerator extends BasicController {
     /**
      * 加速器申请api接口
      * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function apply() {
 
         //接收客户端提交过来的数据
-        $id = request()->param('id');
+        $accelerator_id = request()->param('accelerator_id');
         $name = request()->param('name');
+        $mobile = request()->param('mobile');
         $company = request()->param('company');
         $industry = request()->param('industry');
         $duty = request()->param('duty');
         $email = request()->param('email');
-        $plan = request()->file('plan');
-        $plan_name = '';
-        // 移动图片到框架应用根目录/public/images
-        if ($plan) {
-            $info = $plan->move(ROOT_PATH . 'public' . DS . 'images');
-            if ($info) {
-                //成功上传后，获取上传信息
-                //输出文件保存路径
-                $sub_path = str_replace('\\', '/', $info->getSaveName());
-                $plan  = '/images/' . $sub_path;
-                $plan_name = $info->getFilename();
-            }
-        }
+        $status = 0;
+        $apply_time = date('Y-m-d H:i:s', time());
+        $reason = request()->param('reason');
 
         //验证数据
         $validate_data = [
-            'id'        => $id,
+            'accelerator_id' => $accelerator_id,
             'name'      => $name,
             'company'   => $company,
             'industry'  => $industry,
             'duty'      => $duty,
+            'mobile'    => $mobile,
+            'status'    => $status,
+            'apply_time'=> $apply_time,
             'email'     => $email,
-            'plan'      => $plan,
-            'plan_name' => $plan_name
+            'reason'    => $reason
         ];
 
         //验证结果
-        $result = $this->admission_validate->scene('save')->check($validate_data);
+        $result = $this->accelerator_validate->scene('apply')->check($validate_data);
         if (!$result) {
             return json([
                 'code'      => '401',
-                'message'   => $this->admission_validate->getError()
+                'message'   => $this->accelerator_validate->getError()
             ]);
         }
 
-        if (empty($id)) {
-            $operator_result = $this->admission_model->save($validate_data);
-        } else {
-            $operator_result = $this->admission_model->save($validate_data, ['id' => $id]);
+
+        //判断用户是否已经登陆
+        $client_token = request()->header('access-token');
+        if (Session::has('access_token')){
+            // 获取服务端存储的token
+            $server_token = Session::get('access_token');
+            if ($server_token != $client_token) {
+                return json(['code' => '302', 'message' => '请先登录']);
+            }
         }
 
-        if ($operator_result) {
-            return json([
-                'code'      => '200',
-                'message'   => '操作数据成功',
-            ]);
+        // 判断用户是否已报名
+        $user_id = session('user.id');
+        $result  = $this->user_accelerator_model
+            ->where(['user_id' => $user_id, 'accelerator_id' => $accelerator_id])
+            ->find();
+        if ($result) {
+            return json(['code' => '400', 'message' => '您已报名该加速器,无需重复提交']);
+        }
+
+        //获取加速器消息
+        $active_info = $this->accelerator_model
+            ->where(['id' => $accelerator_id])
+            ->find();
+
+        //整理k加速器状态
+        $now_time = date('Y-m-d h:i:s', time());
+
+        if ( $active_info['limit'] != 0 ){
+            if ( $active_info['limit'] <= $active_info['register'] ){
+                return json(['code' => '400', 'message' => '报名人数已满']);
+            }
+        }
+
+        if ( $active_info['apply_time'] < $now_time ){
+            return json(['code' => '400', 'message' => '活动已结束']);
+        }elseif ( $active_info['begin_time'] > $now_time ){
+            return json(['code' => '400', 'message' => '活动报名未开始']);
+        }elseif ( $active_info['end_time'] < $now_time ){
+            return json(['code' => '400', 'message' => '活动报名已截止']);
+        }
+
+        //判断直接审核或者等待审核
+        if ( $active_info['audit_method'] == 1 ){
+            $user_active_status = 1;
+        }else{
+            $user_active_status = 0;
+        }
+
+        $data = ['user_id' => $user_id, 'accelerator_id' => $accelerator_id
+            , 'register_time' => date("Y-m-d H:i:s", time()), 'status' => $user_active_status];
+        $data = array_merge($data, $validate_data);
+
+        $result = $this->user_accelerator_model->insert($data);
+        if ($result) {
+            // 活动人数+1
+            $this->accelerator_model
+                ->where(['id' => $accelerator_id])
+                ->setInc('register');
+            return json(['code' => '200', 'message' => '提交成功']);
         } else {
-            return json([
-                'code'      => '401',
-                'message'   => '操作数据失败'
-            ]);
+            return json(['code' => '404', 'message' => '报名失败']);
         }
     }
 }

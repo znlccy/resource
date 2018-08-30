@@ -100,10 +100,21 @@ class Star extends BasisController {
         if ($update_start && $update_end) {
             $conditions['update_time'] = ['between time', [$update_start, $update_end]];
         }
-        if ($status || $status === 0) {
-            $conditions['status'] = $status;
+        if (is_null($status)) {
+            $conditions['status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['status'] = $status;
+                    break;
+                case 1:
+                    $conditions['status'] = $status;
+                    break;
+                default:
+                    break;
+            }
         }
-        if ($sort || $sort === 0) {
+        if ($sort) {
             $conditions['sort'] = $sort;
         }
 

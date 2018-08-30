@@ -232,8 +232,19 @@ class User extends BasisController {
         if ($auditor || $auditor === 0) {
             $conditions['auditor'] = $auditor;
         }
-        if ($status || $status === 0) {
-            $conditions['status'] = $status;
+        if (is_null($status)) {
+            $conditions['status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['status'] = $status;
+                    break;
+                case 1:
+                    $conditions['status'] = $status;
+                    break;
+                default:
+                    break;
+            }
         }
 
         //返回结果
@@ -256,7 +267,9 @@ class User extends BasisController {
     }
 
     /**
-     *
+     * 等待审核api接口
+     * @return \think\response\Json
+     * @throws \think\exception\DbException
      */
     public function wait_auditor_entry() {
         //接收客户端提交的数据
@@ -307,8 +320,19 @@ class User extends BasisController {
             $conditions['update_time'] = ['between time', [$login_start, $login_end]];
         }
         $conditions['auditor'] = 1;
-        if ($status || $status === 0) {
-            $conditions['status'] = $status;
+        if (is_null($status)) {
+            $conditions['status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['status'] = $status;
+                    break;
+                case 1:
+                    $conditions['status'] = $status;
+                    break;
+                default:
+                    break;
+            }
         }
 
         //返回结果

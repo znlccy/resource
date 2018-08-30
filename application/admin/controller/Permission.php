@@ -132,8 +132,19 @@ class Permission extends BasisController {
         if ($id) {
             $conditions['id'] = $id;
         }
-        if ($status || $status === 0) {
-            $conditions['status'] = $status;
+        if (is_null($status)) {
+            $conditions['status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['status'] = $status;
+                    break;
+                case 1:
+                    $conditions['status'] = $status;
+                    break;
+                default:
+                    break;
+            }
         }
         if ($name) {
             $conditions['name'] = ['like', '%' . $name . '%'];
@@ -147,7 +158,7 @@ class Permission extends BasisController {
         if ($description) {
             $conditions['description'] = ['like', '%' . $description . '%'];
         }
-        if ($sort || $sort === 0) {
+        if ($sort) {
             $conditions['sort'] = $sort;
         }
         if ($level) {

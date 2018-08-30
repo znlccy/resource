@@ -120,8 +120,19 @@ class Admission extends Controller {
         if ($email) {
             $conditions['email'] = ['like', '%' . $email . '%'];
         }
-        if ($status || $status === 0) {
-            $conditions['status'] = $status;
+        if (is_null($status)) {
+            $conditions['status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['status'] = $status;
+                    break;
+                case 1:
+                    $conditions['status'] = $status;
+                    break;
+                default:
+                    break;
+            }
         }
         if ($create_start && $create_end) {
             $conditions['create_time'] = ['between time', [$create_start, $create_end]];

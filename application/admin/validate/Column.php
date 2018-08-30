@@ -47,7 +47,7 @@ class Column extends BasisValidate {
     //验证场景
     protected $scene = [
         'entry'         => ['id' => 'number', 'name' => 'max:120', 'sort' => 'number', 'status' => 'number', 'create_start' => 'date', 'create_end' => 'date', 'update_start' => 'date', 'update_end' => 'date', 'page_size' => 'number', 'jump_page' => 'number'],
-        'save'          => ['id' => 'number', 'name' => 'require|max:120', 'sort' => 'require|number', 'status' => 'require|number'],
+        'save'          => ['id' => 'number', 'name' => 'require|max:120', 'sort' => 'require|number|min:1', 'status' => 'require|number'],
         'detail'        => ['id' => 'require|number'],
         'delete'        => ['id' => 'require|number']
     ];

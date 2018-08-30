@@ -127,11 +127,33 @@ class Dynamic extends BasisController {
         if ($publish_start && $publish_end) {
             $conditions['publish_time'] = ['between time', [$publish_start, $publish_end]];
         }
-        if ($recommend || $recommend === 0) {
-            $conditions['recommend'] = $recommend;
+        if (is_null($recommend)) {
+            $conditions['recommend'] = ['in',[0,1]];
+        } else {
+            switch ($recommend) {
+                case 0:
+                    $conditions['recommend'] = $recommend;
+                    break;
+                case 1:
+                    $conditions['recommend'] = $recommend;
+                    break;
+                default:
+                    break;
+            }
         }
-        if ($status || $status === 0) {
-            $conditions['status'] = $status;
+        if (is_null($status)) {
+            $conditions['status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['status'] = $status;
+                    break;
+                case 1:
+                    $conditions['status'] = $status;
+                    break;
+                default:
+                    break;
+            }
         }
         if ($publisher) {
             $conditions['publisher'] = $publisher;
