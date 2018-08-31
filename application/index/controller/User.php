@@ -18,6 +18,7 @@ use app\index\model\UserAccelerator as UserAcceleratorModel;
 use app\index\model\Accelerator as AcceleratorModel;
 use app\index\model\Group as GroupModel;
 use app\index\model\UserGroup as UserGroupModel;
+use think\Config;
 use think\Request;
 use think\Session;
 

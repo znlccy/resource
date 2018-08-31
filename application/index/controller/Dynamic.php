@@ -85,7 +85,7 @@ class Dynamic extends BasicControllerc {
             ->order('td.id', 'desc')
             ->order('td.create_time', 'desc')
             ->join('tb_column tc', 'td.column_id = tc.id')
-            ->field('td.id, td.title, td.picture, tc.name')
+            ->field('td.id, td.title, td.picture, td.description, td.create_time, tc.name, tc.id as column_id')
             ->paginate($page_size, false, ['page' => $jump_page]);
 
         //返回数据
