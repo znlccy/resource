@@ -12,6 +12,7 @@ namespace app\index\controller;
 use app\index\model\Accelerator as AcceleratorModel;
 use app\index\validate\Accelerator as AcceleratorValidate;
 use app\index\model\UserAccelerator as UserAcceleratorModel;
+use app\index\model\Booster as BoosterModel;
 use think\Controller;
 use think\Request;
 
@@ -27,7 +28,7 @@ class Accelerator extends Controller {
      * 声明加速器申请模型
      * @var
      */
-    protected $user_accelerator_model;
+    protected $booster_model;
 
     /**
      * 声明加速器申请验证器
@@ -49,7 +50,7 @@ class Accelerator extends Controller {
     public function __construct(Request $request = null) {
         parent::__construct($request);
         $this->accelerator_model = new AcceleratorModel();
-        $this->user_accelerator_model = new UserAcceleratorModel();
+        $this->booster_model = new BoosterModel();
         $this->accelerator_validate = new AcceleratorValidate();
         $this->accelerator_page = config('pagination');
     }
@@ -146,7 +147,6 @@ class Accelerator extends Controller {
             ]);
         }
 
-
         //判断用户是否已经登陆
         $client_token = request()->header('access-token');
         if (Session::has('access_token')){
@@ -159,7 +159,7 @@ class Accelerator extends Controller {
 
         // 判断用户是否已报名
         $user_id = session('user.id');
-        $result  = $this->user_accelerator_model
+        $result  = $this->booster_model
             ->where(['user_id' => $user_id, 'accelerator_id' => $accelerator_id])
             ->find();
         if ($result) {
@@ -167,39 +167,39 @@ class Accelerator extends Controller {
         }
 
         //获取加速器消息
-        $active_info = $this->accelerator_model
+        $accelerator_info = $this->accelerator_model
             ->where(['id' => $accelerator_id])
             ->find();
 
-        //整理k加速器状态
+        //整理加速器状态
         $now_time = date('Y-m-d h:i:s', time());
 
-        if ( $active_info['limit'] != 0 ){
-            if ( $active_info['limit'] <= $active_info['register'] ){
+        if ( $accelerator_info['limit'] != 0 ){
+            if ( $accelerator_info['limit'] <= $accelerator_info['register'] ){
                 return json(['code' => '400', 'message' => '报名人数已满']);
             }
         }
 
-        if ( $active_info['apply_time'] < $now_time ){
+        if ( $accelerator_info['apply_time'] < $now_time ){
             return json(['code' => '400', 'message' => '活动已结束']);
-        }elseif ( $active_info['begin_time'] > $now_time ){
+        }elseif ( $accelerator_info['begin_time'] > $now_time ){
             return json(['code' => '400', 'message' => '活动报名未开始']);
-        }elseif ( $active_info['end_time'] < $now_time ){
+        }elseif ( $accelerator_info['end_time'] < $now_time ){
             return json(['code' => '400', 'message' => '活动报名已截止']);
         }
 
         //判断直接审核或者等待审核
-        if ( $active_info['audit_method'] == 1 ){
+        if ( $accelerator_info['audit_method'] == 1 ){
             $user_active_status = 1;
         }else{
             $user_active_status = 0;
         }
 
-        $data = ['user_id' => $user_id, 'accelerator_id' => $accelerator_id
+        $data = ['user_id' => $user_id, 'accelerator_id' => $accelerator_id, 'name' => $name, 'company' => $company
             , 'register_time' => date("Y-m-d H:i:s", time()), 'status' => $user_active_status];
         $data = array_merge($data, $validate_data);
 
-        $result = $this->user_accelerator_model->insert($data);
+        $result = $this->booster_model->insert($data);
         if ($result) {
             // 活动人数+1
             $this->accelerator_model

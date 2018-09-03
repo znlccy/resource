@@ -35,5 +35,4 @@ class User extends BasisModel {
      */
     protected $table = 'tb_user';
 
-
 }

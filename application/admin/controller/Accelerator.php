@@ -11,6 +11,7 @@ namespace app\admin\controller;
 
 use think\Request;
 use app\admin\model\Accelerator as AcceleratorModel;
+use app\admin\model\UserAccelerator as UserAcceleratorModel;
 use app\admin\model\Category as CategoryModel;
 use app\admin\validate\Accelerator as AcceleratorValidate;
 
@@ -27,6 +28,12 @@ class Accelerator extends BasisController {
      * @var
      */
     protected $category_model;
+
+    /**
+     * 用户加速器模型
+     * @var
+     */
+    protected $user_accelerator_model;
 
     /**
      * 声明加速器验证器
@@ -49,6 +56,7 @@ class Accelerator extends BasisController {
         parent::__construct($request);
         $this->accelerator_model = new AcceleratorModel();
         $this->category_model = new CategoryModel();
+        $this->user_accelerator_model = new UserAcceleratorModel();
         $this->accelerator_validate = new AcceleratorValidate();
         $this->accelerator_page = config('pagination');
     }
@@ -331,6 +339,145 @@ class Accelerator extends BasisController {
                 'message'   => '删除数据失败'
             ]);
         }
+    }
+
+    /**
+     * 加速器报名列表api接口
+     */
+    public function apply_list() {
+        /* 获取客户端提供的数据 */
+        $id = request()->param('id');
+        $apply_time_start = request()->param('apply_time_start');
+        $apply_time_end = request()->param('apply_time_end');
+        $company = request()->param('company');
+        $industry = request()->param('industry');
+        $duty = request()->param('duty');
+        $username = request()->param('username');
+        $mobile = request()->param('mobile');
+        $email = request()->param('email');
+        $status = request()->param('status');
+        $page_size = request()->param('page_size', $this->accelerator_page['PAGE_SIZE']);
+        $jump_page = request()->param('jump_page', $this->accelerator_page['JUMP_PAGE']);
+
+
+        /* 验证数据 */
+        $validate_data = [
+            'id'              => $id,
+            'page_size'       => $page_size,
+            'jump_page'       => $jump_page,
+            'apply_time_start'=> $apply_time_start,
+            'apply_time_end'  => $apply_time_end,
+            'company'         => $company,
+            'industry'        => $industry,
+            'duty'            => $duty,
+            'username'        => $username,
+            'mobile'          => $mobile,
+            'email'           => $email,
+            'status'          => $status
+        ];
+
+        //验证结果
+        $result   = $this->accelerator_validate->scene('apply_list')->check($validate_data);
+        if (!$result) {
+            return json(['code' => '401', 'message' => $this->accelerator_validate->getError()]);
+        }
+
+        //筛选条件
+        $conditions = [];
+
+        if ($id) {
+            $conditions['ua.accelerator_id'] = $id;
+        }
+        if ($apply_time_start && $apply_time_end) {
+            $conditions['tu.apply_time'] = ['between time',[$apply_time_start, $apply_time_end]];
+        }
+        if ($company) {
+            $conditions['tu.company'] = ['like', '%' . $company . '%'];
+        }
+        if ($industry) {
+            $conditions['tu.occupation'] = ['like', '%' . $industry . '%'];
+        }
+        if ($duty) {
+            $conditions['tu.career'] = ['like', '%' . $duty . '%'];
+        }
+        if ($username) {
+            $conditions['tu.username'] = ['like', '%' . $username . '%'];
+        }
+        if ($email) {
+            $conditions['tu.email'] = ['like', '%' . $email .'%'];
+        }
+        if ($mobile) {
+            $conditions['tu.mobile'] = ['like', '%' . $mobile . '%'];
+        }
+        if (is_null($status)) {
+            $conditions['tu.status'] = ['in',[0,1]];
+        } else {
+            switch ($status) {
+                case 0:
+                    $conditions['tu.status'] = $status;
+                    break;
+                case 1:
+                    $conditions['tu.status'] = $status;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /* 返回结果 */
+        $result = $this->user_accelerator_model
+            -> alias('ua')
+            -> join('tb_user tu', 'ua.user_id = tu.id')
+            -> join('tb_accelerator ta', 'ta.id = ua.accelerator_id')
+            -> where($conditions)
+            -> field('tu.mobile, ta.id as accelerator_id,ta.name as accelerator_name, ta.status, ta.apply_time, tu.username, tu.mobile, tu.email, tu.career, tu.occupation, tu.company')
+            ->paginate($page_size, false, ['page' => $jump_page]);
+
+        if ($result) {
+            return json(['code' => '200', 'message' => '查询成功', 'data' => $result]);
+        } else {
+            return json(['code' => '404', 'message' => '查询失败']);
+        }
+    }
+
+    /**
+     * 加速器报名审核
+     */
+    public function auditor() {
+
+        //接收客户端提交过来的数据
+        $id     = request()->param('id');
+
+        if(empty($id)) {
+            return json(['code' => '401', 'message' => '加速器id不能为空']);
+        }
+
+        /* 验证规则 */
+        $validate_data = [
+            'id'     => $id,
+            'status'     => 1
+        ];
+
+        //验证结果
+        $result   = $this->accelerator_validate->scene('check')->check($validate_data);
+        if (!$result) {
+            return json(['code' => '401', 'message' => $this->accelerator_validate->getError()]);
+        }
+
+        //审核结果
+        $accelerator = $this->accelerator_model->where('id', $id)->find();
+        if ($accelerator['status'] == 1) {
+            return json(['code' => '401', 'message' => '该加速器已经通过审核了']);
+        } else {
+            /* 审核结果 */
+            $auditor_result = $this->accelerator_model->save($validate_data,['id' => $id]);
+            if ($auditor_result) {
+                return json(['code' => '200', 'message' => '审核通过']);
+            } else {
+                return json(['code' => '404', 'message' => '审核失败，数据库中可能没有这个加速器']);
+            }
+        }
+
     }
 
     /**
