@@ -16,8 +16,6 @@ use app\index\model\UserInformation as UserInformationModel;
 use app\index\model\Information as InformationModel;
 use app\index\model\UserAccelerator as UserAcceleratorModel;
 use app\index\model\Accelerator as AcceleratorModel;
-use app\index\model\Group as GroupModel;
-use app\index\model\UserGroup as UserGroupModel;
 use think\Config;
 use think\Request;
 use think\Session;
@@ -61,16 +59,6 @@ class User extends BasicController {
     protected $accelerator_model;
 
     /**
-     * @var
-     */
-    protected $group_model;
-
-    /**
-     * @var
-     */
-    protected $user_group_model;
-
-    /**
      * 声明用户验证器
      * @var
      */
@@ -95,8 +83,6 @@ class User extends BasicController {
         $this->information_model = new InformationModel();
         $this->user_accelerator_model = new UserAcceleratorModel();
         $this->accelerator_model = new AcceleratorModel();
-        $this->group_model = new GroupModel();
-        $this->user_group_model = new UserGroupModel();
         $this->user_page = config('pagination');
         $this->user_validate = new UserValidate();
     }
@@ -129,8 +115,6 @@ class User extends BasicController {
             ->where('password', '=', md5($password))
             ->find();
 
-        $auditor = $user['auditor'];
-
         if (empty($user) ) {
             return json(['code' => '404', 'message' => '数据库中还没有该用户或者输入的账号密码错误']);
         }
@@ -139,7 +123,7 @@ class User extends BasicController {
         $token = general_token($mobile, $password);
         Session::set('access_token', $token);
 
-        return json(['code' => '200', 'message'   => '登录成功',  'access_token' => $token, 'mobile' => $mobile, 'auditor' => $auditor]);
+        return json(['code' => '200', 'message'   => '登录成功',  'access_token' => $token, 'mobile' => $mobile]);
     }
 
     /**
@@ -351,7 +335,7 @@ class User extends BasicController {
         $email = request()->param('email');
         $company = request()->param('company');
         $industry = request()->param('industry');
-        $occupation = request()->param('occupation');
+        $duty = request()->param('duty');
 
         /* 验证数据 */
         $validate_data = [
@@ -360,7 +344,7 @@ class User extends BasicController {
             'email'         => $email,
             'company'       => $company,
             'industry'      => $industry,
-            'occupation'    => $occupation,
+            'duty'          => $duty,
         ];
 
         //实例化验证器
@@ -384,7 +368,6 @@ class User extends BasicController {
      * 已登陆 - 修改密码接口
      */
     public function modify_pass() {
-
         /* 获取客户端提供的数据 */
         $user_id = Session::get('user.id');
         $old_password = request()->param('old_password');
@@ -468,7 +451,7 @@ class User extends BasicController {
 
         $information = $this->information_model
             ->alias('in')
-            ->field('in.id, in.title, in.publish_time, a.nickname as publisher')
+            ->field('in.id, in.title, in.publish_time, a.nick_name as publisher')
             ->join('tb_admin a', 'in.publisher = a.id')
             ->paginate($page_size, false, ['page' => $jump_page])->each(function($item, $key) use ($info){
                 if (in_array($item['id'], $info)) {
@@ -512,12 +495,12 @@ class User extends BasicController {
         $information = $this->information_model->alias('in')
             ->where('in.id', '=', $id)
             ->join('tb_admin a', 'in.publisher = a.id')
-            ->field('in.id, in.title, in.publish_time, in.richtext, a.nickname as publisher')
+            ->field('in.id, in.title, in.publish_time, in.rich_text, a.nick_name as publisher')
             ->find();
 
         if ( empty($information) ){
             return json([
-                'code'      => '402',
+                'code'      => '404',
                 'message'   => '消息不存在',
             ]);
         }
@@ -586,13 +569,56 @@ class User extends BasicController {
 
         $data = $this->user_accelerator_model
             ->alias('ua')
-            ->where('user_id', '=', $user_id)
+            ->where('ua.user_id', '=', $user_id)
             ->join('tb_accelerator a', 'ua.accelerator_id = a.id')
-            ->field('ua.register_time, ua.status, a.title, a.register_time, a.id')
+            ->join('tb_user tu', 'ua.user_id = tu.id')
+            ->field('a.status , a.name, a.id, a.apply_time, tu.mobile')
             ->paginate($page_size, false, ['page' => $jump_page]);
 
         return json(['code' => '200', 'message' => '读取成功', 'data' => $data]);
 
+    }
+
+    /**
+     * 获取加速器详情
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function detail() {
+
+        //获取客户端提交过来的数据
+        $id = request()->param('id');
+
+        //验证数据
+        $validate_data = [
+            'id'        => $id
+        ];
+
+        //验证结果
+        $result = $this->user_validate->scene('detail')->check($validate_data);
+        if (!$result) {
+            return json([
+                'code'      => '401',
+                'message'   => ''
+            ]);
+        }
+
+        //返回客户端结果
+        $accelerator = $this->accelerator_model->where('id', $id)->find();
+        if ($accelerator) {
+            return  json([
+                'code'      => '200',
+                'message'   => '查询加速器成功',
+                'data'      => $accelerator
+            ]);
+        } else {
+            return  json([
+                'code'      => '404',
+                'message'   => '查询加速器失败，数据库中不存在'
+            ]);
+        }
     }
 
     /**

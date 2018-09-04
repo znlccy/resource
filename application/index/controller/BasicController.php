@@ -10,7 +10,9 @@
 namespace app\index\controller;
 
 use think\Controller;
+use think\Hook;
 use think\Request;
+use think\Session;
 
 class BasicController extends Controller {
     // 用户id
@@ -25,16 +27,12 @@ class BasicController extends Controller {
         'Service' => ['more', 'index', 'detail', 'category'],
         'Review' => ['index', 'detail'],
         'Active' => ['index', 'introduce'],
+        'Accelerator' => ['index','detail'],
+        'Star'  => ['index','detail'],
+        'Dynamic' => ['index','detail'],
         'Index' => ['index'],
         'Verify' => ['attain'],
         'Sms' => ['attain'],
-        'Competition' => ['introduce'],
-        'Investor' => ['index'],
-        'News' => ['index'],
-        'Team' => ['index'],
-        'Tutor' => ['index'],
-        'Forum' => ['index', 'introduce'],
-        'Sp' => ['index'],
         'Image' => ['upload']
     ];
 

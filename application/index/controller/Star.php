@@ -92,4 +92,43 @@ class Star extends BasicController {
         }
     }
 
+    /**
+     *
+     */
+    public function detail() {
+
+        //获取客户端提交过来的数据
+        $id = request()->param('id');
+
+        //验证数据
+        $validate_data = [
+            'id'        => $id
+        ];
+
+        //验证结果
+        $result = $this->star_validate->scene('detail')->check($validate_data);
+        if (!$result) {
+            return json([
+                'code'      => '401',
+                'message'   => $this->star_validate->getError()
+            ]);
+        }
+
+        //返回结果
+        $star = $this->star_model->where('id', $id)->find();
+        if ($star) {
+            return json([
+                'code'      => '200',
+                'message'   => '查询信息成功',
+                'data'      => $star
+            ]);
+        } else {
+            return json([
+                'code'      => '404',
+                'message'   => '查询信息失败'
+            ]);
+        }
+    }
+
+
 }

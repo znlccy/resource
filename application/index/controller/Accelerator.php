@@ -103,6 +103,48 @@ class Accelerator extends Controller {
     }
 
     /**
+     * 获取加速器详情
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function detail() {
+
+        //接收客户端提交过来的数据
+        $id = request()->param('id');
+
+        //验证数据
+        $validate_data = [
+            'id'       => $id
+        ];
+
+        //验证结果
+        $result = $this->accelerator_validate->scene('detail')->check($validate_data);
+        if (!$result) {
+            return json([
+                'code'      => '401',
+                'message'   => $this->accelerator_validate->getError()
+            ]);
+        }
+
+        //返回给客户端数据
+        $accelerator = $this->accelerator_model->where('id', $id)->find();
+        if ($accelerator) {
+            return json([
+                'code'      => '200',
+                'message'   => '查询信息成功',
+                'data'      => $accelerator
+            ]);
+        } else {
+            return json([
+                'code'      => '404',
+                'message'   => '查询信息失败，数据库中不存在',
+            ]);
+        }
+    }
+
+    /**
      * 加速器申请api接口
      * @return \think\response\Json
      * @throws \think\Exception

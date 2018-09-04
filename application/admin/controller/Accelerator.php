@@ -395,10 +395,10 @@ class Accelerator extends BasisController {
             $conditions['tu.company'] = ['like', '%' . $company . '%'];
         }
         if ($industry) {
-            $conditions['tu.occupation'] = ['like', '%' . $industry . '%'];
+            $conditions['tu.industry'] = ['like', '%' . $industry . '%'];
         }
         if ($duty) {
-            $conditions['tu.career'] = ['like', '%' . $duty . '%'];
+            $conditions['tu.duty'] = ['like', '%' . $duty . '%'];
         }
         if ($username) {
             $conditions['tu.username'] = ['like', '%' . $username . '%'];
@@ -430,7 +430,7 @@ class Accelerator extends BasisController {
             -> join('tb_user tu', 'ua.user_id = tu.id')
             -> join('tb_accelerator ta', 'ta.id = ua.accelerator_id')
             -> where($conditions)
-            -> field('tu.mobile, ta.id as accelerator_id,ta.name as accelerator_name, ta.status, ta.apply_time, tu.username, tu.mobile, tu.email, tu.career, tu.occupation, tu.company')
+            -> field('tu.mobile, ta.id as accelerator_id,ta.name as accelerator_name, ta.status, ta.apply_time, tu.username, tu.mobile, tu.email, tu.duty, tu.industry, tu.company')
             ->paginate($page_size, false, ['page' => $jump_page]);
 
         if ($result) {

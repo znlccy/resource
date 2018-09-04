@@ -13,7 +13,7 @@ use app\index\model\Dynamic  as DynamicModel;
 use app\index\validate\Dynamic as DynamicValidate;
 use think\Request;
 
-class Dynamic extends BasicControllerc {
+class Dynamic extends BasicController {
     /**
      * 声明动态模型
      * @var

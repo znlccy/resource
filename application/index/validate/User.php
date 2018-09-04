@@ -62,12 +62,14 @@ class User extends BasicValidate {
         'register'          => ['mobile' => 'require|length:11|regex:mobile', 'password' => 'require|length:8,25|alphaDash', 'verify' => 'require|captcha', 'code' => 'require|length:6|number'],
         'recover_pass'      => ['mobile' => 'require|length:11|regex:mobile', 'code' => 'require|length:6|number', 'verify' => 'require|captcha'],
         'change_pass'       => ['password' => 'require|length:8,25|alphaDash', 'confirm_pass' => 'require|length:8,25|alphaDash|confirm:password', 'encrypted_str' => 'require'],
-        'modify_info'       => ['username' => 'require|length:2,25', 'email' => 'require|email', 'company' => 'require|max:255', 'career' => 'require|max:255', 'occupation' => 'require|max:255'],
+        'modify_info'       => ['username' => 'require|length:2,25', 'email' => 'require|email', 'company' => 'require|max:255', 'duty' => 'require|max:255', 'industry' => 'require|max:255'],
         'apply'             => ['page_size' => 'number', 'jump_page' => 'number'],
         'cancel'            => ['id' => 'require|number'],
         'modify_pass'       => ['old_password'   => 'require|length:8,25|alphaDash', 'password' => 'require|length:8,25|alphaDash|confirm:confirm_pass', 'confirm_pass'   => 'require|length:8,25|alphaDash'],
         'notification'      => ['page_size' => 'number', 'jump_page' => 'number'],
         'notification_detail' => ['id' => 'require|number'],
         'save'   => ['id' => 'number', 'company' => 'require|max:255', 'stage' => 'require|max:255', 'website' => 'url', 'industry' => 'max:255', 'legal_person' => 'require|max:255', 'duty' => 'max:255', 'mobile' => 'require|length:11|regex:mobile', 'phone' => 'max:255', 'email' => 'require|email', 'register_address' => 'require|max:255', 'business_license' => 'max:255', 'register_capital' => 'require|number', 'license_scan' => 'require', 'mailing_address' => 'max:255', 'sales_volume' => 'max:255', 'total_people' => 'number', 'developer_people' => 'number', 'patent' => 'max:255', 'high_technology' => 'require|number', 'service_direction'=> 'max:255', 'products_introduce' => 'min:300', 'business_introduce' => 'min:30', 'logo' => 'require'],
+        'detail'            => ['id' => '加速器主键']
     ];
+
 }
