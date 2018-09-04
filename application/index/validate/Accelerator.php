@@ -41,6 +41,7 @@ class Accelerator extends BasicValidate {
     //验证场景
     protected $scene = [
         'index'     => ['page_size' => 'number', 'jump_page' => 'number'],
-        'apply'     => [ 'name' => 'require|max:255', 'company' => 'require|max:255', 'industry' =>'require|max:255', 'duty' => 'require|max:255', 'email' => 'require|email', 'mobile' => 'require|regex:mobile|length:11|number', 'status' => 'number', 'plan' => 'require']
+        'apply'     => [ 'name' => 'require|max:255', 'company' => 'require|max:255', 'industry' =>'require|max:255', 'duty' => 'require|max:255', 'email' => 'require|email', 'mobile' => 'require|regex:mobile|length:11|number', 'status' => 'number', 'plan' => 'require'],
+        'detail'    => ['id' => 'require|number']
     ];
 }
