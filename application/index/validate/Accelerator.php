@@ -11,6 +11,9 @@ namespace app\index\validate;
 
 class Accelerator extends BasicValidate {
 
+    //手机验证正则表达式
+    protected $regex = [ 'mobile' => '/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/'];
+
     //验证规则
     protected $rule = [
         'id'        => 'number',
@@ -19,7 +22,7 @@ class Accelerator extends BasicValidate {
         'industry'  => 'max:255',
         'duty'      => 'max:255',
         'email'     => 'email',
-        'plan'      => 'fileExt:rar,zip|fileSize:5M',
+        'reason'    => 'max:255',
     ];
 
     //验证消息
@@ -35,13 +38,13 @@ class Accelerator extends BasicValidate {
         'industry'  => '行业名称',
         'duty'      => '职务名称',
         'email'     => '电子邮箱',
-        'plan'      => '商业企划书',
+        'reason'    => '申请理由',
     ];
 
     //验证场景
     protected $scene = [
         'index'     => ['page_size' => 'number', 'jump_page' => 'number'],
-        'apply'     => [ 'name' => 'require|max:255', 'company' => 'require|max:255', 'industry' =>'require|max:255', 'duty' => 'require|max:255', 'email' => 'require|email', 'mobile' => 'require|regex:mobile|length:11|number', 'status' => 'number', 'plan' => 'require'],
+        'apply'     => [ 'name' => 'max:255', 'company' => 'max:255', 'industry' =>'max:255', 'duty' => 'max:255', 'email' => 'email', 'mobile' => 'regex:mobile|length:11|number', 'status' => 'number', 'reason' => 'require'],
         'detail'    => ['id' => 'require|number']
     ];
 }

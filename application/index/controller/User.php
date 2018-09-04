@@ -115,6 +115,13 @@ class User extends BasicController {
             ->where('password', '=', md5($password))
             ->find();
 
+        $data = [
+            'login_time'        => date("Y-m-d H:s:i", time()),
+            'login_ip'          => request()->ip()
+        ];
+
+        $this->user_model->save($data, ['id' => $user['id']]);
+
         if (empty($user) ) {
             return json(['code' => '404', 'message' => '数据库中还没有该用户或者输入的账号密码错误']);
         }
@@ -168,6 +175,7 @@ class User extends BasicController {
         $user_data = [
             'mobile'        => $mobile,
             'password'      => md5($password),
+            'register_time' => date('Y-m-d H:i:s', time())
         ];
 
         $register_result =$this->user_model->insertGetId($user_data);
