@@ -72,7 +72,6 @@ class Accelerator extends BasisController {
         $id = request()->param('id');
         $name = request()->param('name');
         $description = request()->param('description');
-        $category_id = request()->param('category_id');
         $price_start = request()->param('price_start');
         $price_end = request()->param('price_end');
         $recommend = request()->param('recommend');
@@ -92,7 +91,6 @@ class Accelerator extends BasisController {
             'id'            => $id,
             'name'          => $name,
             'description'   => $description,
-            'category_id'   => $category_id,
             'price_start'   => $price_start,
             'price_end'     => $price_end,
             'recommend'     => $recommend,
@@ -127,9 +125,6 @@ class Accelerator extends BasisController {
         }
         if ($description) {
             $conditions['description'] = ['like', '%' . $description .'%'];
-        }
-        if ($category_id) {
-            $conditions['category_id'] = $category_id;
         }
         if ($price_start && $price_end) {
             $conditions['price'] = ['between',[$price_start, $price_end]];
@@ -177,14 +172,8 @@ class Accelerator extends BasisController {
 
         //返回结果
         $service = $this->accelerator_model->where($conditions)
-            ->with(['category' => function ($query) {
-                $query->withField("id, name");
-            }])
             ->order('id', 'desc')
-            ->paginate($page_size, false, ['page' => $jump_page])->each(function ($item, $key) {
-                unset($item['category_id']);
-                return $item;
-            });
+            ->paginate($page_size, false, ['page' => $jump_page]);
         return json([
             'code'      => '200',
             'message'   => '获取服务列表成功',
@@ -204,7 +193,6 @@ class Accelerator extends BasisController {
         $name         = request()->param('name');
         $description  = request()->param('description');
         $picture      = request()->file('picture');
-        $category_id  = request()->param('category_id');
         $price        = request()->param('price');
         $recommend    = request()->param('recommend', 1);
         $address      = request()->param('address');
@@ -229,7 +217,6 @@ class Accelerator extends BasisController {
             'name'          => $name,
             'description'   => $description,
             'picture'       => $picture,
-            'category_id'   => $category_id,
             'price'         => $price,
             'recommend'     => $recommend,
             'address'       => $address,
