@@ -102,7 +102,17 @@ class Admission extends Controller {
         if (empty($id)) {
             $operator_result = $this->admission_model->save($validate_data);
         } else {
-            $operator_result = $this->admission_model->save($validate_data, ['id' => $id]);
+            $update_data = [
+                'name'      => $name,
+                'company'   => $company,
+                'industry'  => $industry,
+                'duty'      => $duty,
+                'email'     => $email,
+                'status'    => $status,
+                'mobile'    => $mobile,
+                'plan'      => $plan
+            ];
+            $operator_result = $this->admission_model->save($update_data, ['id' => $id]);
         }
 
         if ($operator_result) {

@@ -11,10 +11,9 @@ namespace app\admin\controller;
 
 use app\admin\model\Admission as AdmissionModel;
 use app\admin\validate\Admission as AdmissionValidate;
-use think\Controller;
 use think\Request;
 
-class Admission extends Controller {
+class Admission extends BasisController {
 
     /**
      * 声明入驻项目模型
@@ -170,10 +169,12 @@ class Admission extends Controller {
         //接收客户端提交过来的数据
         $id = request()->param('id');
         $name = request()->param('name');
+        $mobile = request()->param('mobile');
         $company = request()->param('company');
         $industry = request()->param('industry');
         $duty = request()->param('duty');
         $email = request()->param('email');
+        $status = request()->param('status');
         $plan = request()->file('plan');
         $plan_name = '';
         // 移动图片到框架应用根目录/public/images
@@ -195,7 +196,9 @@ class Admission extends Controller {
             'company'   => $company,
             'industry'  => $industry,
             'duty'      => $duty,
+            'mobile'    => $mobile,
             'email'     => $email,
+            'status'    => $status,
             'plan'      => $plan,
             'plan_name' => $plan_name
         ];
@@ -212,6 +215,9 @@ class Admission extends Controller {
         if (empty($id)) {
             $operator_result = $this->admission_model->save($validate_data);
         } else {
+            if (empty($plan)) {
+                unset($validate_data['plan']);
+            }
             $operator_result = $this->admission_model->save($validate_data, ['id' => $id]);
         }
 

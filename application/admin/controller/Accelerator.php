@@ -9,6 +9,7 @@
 
 namespace app\admin\controller;
 
+use think\Controller;
 use think\Request;
 use app\admin\model\Accelerator as AcceleratorModel;
 use app\admin\model\UserAccelerator as UserAcceleratorModel;
@@ -127,7 +128,7 @@ class Accelerator extends BasisController {
             $conditions['description'] = ['like', '%' . $description .'%'];
         }
         if ($price_start && $price_end) {
-            $conditions['price'] = ['between',[$price_start, $price_end]];
+            $conditions['price'] = ['between',[$price_start,$price_end]];
         }
         if (is_null($recommend)) {
             $conditions['recommend'] = ['in',[0,1]];
