@@ -29,7 +29,7 @@ class BasicController extends Controller {
         'Active' => ['index', 'introduce'],
         'Accelerator' => ['index','detail'],
         'Star'  => ['index','detail'],
-        'Dynamic' => ['index','detail'],
+        'Dynamic' => ['index','detail', 'spinner'],
         'Index' => ['index'],
         'Verify' => ['attain'],
         'Sms' => ['attain'],
