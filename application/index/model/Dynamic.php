@@ -21,4 +21,13 @@ class Dynamic extends BasicModel {
      */
     protected $table = 'tb_dynamic';
 
+    /* 设置富文本内容 */
+    public function setRichTextAttr($value) {
+        return htmlspecialchars($value);
+    }
+
+    /* 获取富文本内容 */
+    public function getRichTextAttr($value) {
+        return htmlspecialchars_decode($value);
+    }
 }

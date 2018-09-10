@@ -28,7 +28,7 @@ class Accelerator extends BasicModel {
      * @param $value
      * @return string
      */
-    protected function setRichtextAttr($value) {
+    protected function setRichTextAttr($value) {
         return htmlspecialchars($value);
     }
 
@@ -37,7 +37,7 @@ class Accelerator extends BasicModel {
      * @param $value
      * @return string
      */
-    protected function getRichtextAttr($value) {
+    protected function getRichTextAttr($value) {
         return htmlspecialchars_decode($value);
     }
 
