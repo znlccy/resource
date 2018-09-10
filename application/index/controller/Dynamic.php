@@ -11,6 +11,7 @@ namespace app\index\controller;
 
 use app\index\model\Dynamic  as DynamicModel;
 use app\index\validate\Dynamic as DynamicValidate;
+use app\index\model\Column as ColumnModel;
 use think\Request;
 
 class Dynamic extends BasicController {
@@ -19,6 +20,12 @@ class Dynamic extends BasicController {
      * @var
      */
     protected $dynamic_model;
+
+    /**
+     * 声明分组模型
+     * @var
+     */
+    protected $column_model;
 
     /**
      * 声明动态验证器
@@ -39,6 +46,7 @@ class Dynamic extends BasicController {
     public function __construct(Request $request = null) {
         parent::__construct($request);
         $this->dynamic_model = new DynamicModel();
+        $this->column_model = new ColumnModel();
         $this->dynamic_validate = new DynamicValidate();
         $this->dynamic_page = config('pagination');
     }
@@ -141,6 +149,27 @@ class Dynamic extends BasicController {
             return json([
                 'code'      => '404',
                 'message'   => '查询信息失败'
+            ]);
+        }
+    }
+
+    /**
+     * 动态下拉列表
+     */
+    public function spinner() {
+        //获取数据
+        $column = $this->column_model->where('status','1')->field('id,name')->select();
+
+        if ($column) {
+            return json([
+                'code'      => '200',
+                'message'   => '获取栏目列表成功',
+                'data'      => $column
+            ]);
+        } else {
+            return json([
+                'code'      => '404',
+                'message'   => '获取栏目列表失败'
             ]);
         }
     }
