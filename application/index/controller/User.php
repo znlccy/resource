@@ -35,6 +35,7 @@ class User extends BasicController {
     protected $sms_model;
 
     /**
+     *
      * 声明用户信息模型
      * @var
      */
@@ -705,76 +706,25 @@ class User extends BasicController {
         //获取客户端提交的数据
         $id = request()->param('id');
         $company = request()->param('company');
-        $stage = request()->param('stage');
-        $website = request()->param('website');
         $industry = request()->param('industry');
-        $legal_person = request()->param('legal_person');
         $duty = request()->param('duty');
+        $status = request()->param('status', 1);
         $mobile = request()->param('mobile');
-        $phone = request()->param('phone');
         $email = request()->param('email');
-        $register_address = request()->param('register_address');
-        $business_license = request()->param('business_license');
-        $register_capital = request()->param('register_capital');
-        $license_scan = request()->file('license_scan');
-        // 移动图片到框架应用根目录/public/images
-        if ($license_scan) {
-            $info = $license_scan->move(ROOT_PATH . 'public' . DS . 'images');
-            if ($info) {
-                /*echo '文件保存的名:' . $info->getFilename();*/
-                $sub_path     = str_replace('\\', '/', $info->getSaveName());
-                $license_scan = '/images/' . $sub_path;
-            }
-        }
-        $mailing_address = request()->param('mailing_address');
-        $sales_volume = request()->param('sales_volume');
-        $total_people = request()->param('total_people');
-        $developer_people = request()->param('developer_people');
-        $patent = request()->param('patent');
-        $high_technology = request()->param('high_technology');
-        $service_direction = request()->param('service_direction');
-        $products_introduce = request()->param('products_introduce');
-        $business_introduce = request()->param('business_introduce');
-        $logo = request()->file('logo');
-        // 移动图片到框架应用根目录/public/images
-        if ($logo) {
-            $info = $logo->move(ROOT_PATH . 'public' . DS . 'images');
-            if ($info) {
-                /*echo '文件保存的名:' . $info->getFilename();*/
-                $sub_path     = str_replace('\\', '/', $info->getSaveName());
-                $logo = '/images/' . $sub_path;
-            }
-        }
+        $login_ip = request()->ip();
 
         //验证数据
         $validate_data = [
             'id'                => $id,
             'company'           => $company,
-            'stage'             => $stage,
-            'website'           => $website,
             'industry'          => $industry,
-            'legal_person'      => $legal_person,
             'duty'              => $duty,
             'mobile'            => $mobile,
-            'phone'             => $phone,
+            'status'            => $status,
             'email'             => $email,
-            'register_address'  => $register_address,
-            'business_license'  => $business_license,
-            'register_capital'  => $register_capital,
-            'license_scan'      => $license_scan,
-            'mailing_address'   => $mailing_address,
-            'sales_volume'      => $sales_volume,
-            'total_people'      => $total_people,
-            'developer_people'  => $developer_people,
-            'patent'            => $patent,
-            'high_technology'   => $high_technology,
-            'service_direction' => $service_direction,
-            'products_introduce'=> $products_introduce,
-            'business_introduce'=> $business_introduce,
-            'auditor'           => 1,
-            'logo'              => $logo,
+            'login_ip'          => $login_ip,
             'update_time'       => date('Y-m-d H:s:i', time()),
-            'create_time'       => date('Y-m-d H:s:i', time())
+            'register_time'       => date('Y-m-d H:s:i', time())
         ];
 
         //验证结果

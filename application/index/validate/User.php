@@ -68,8 +68,8 @@ class User extends BasicValidate {
         'modify_pass'       => ['old_password'   => 'require|length:8,25|alphaDash', 'password' => 'require|length:8,25|alphaDash|confirm:confirm_pass', 'confirm_pass'   => 'require|length:8,25|alphaDash'],
         'notification'      => ['page_size' => 'number', 'jump_page' => 'number'],
         'notification_detail' => ['id' => 'require|number'],
-        'save'   => ['id' => 'number', 'company' => 'require|max:255', 'stage' => 'require|max:255', 'website' => 'url', 'industry' => 'max:255', 'legal_person' => 'require|max:255', 'duty' => 'max:255', 'mobile' => 'require|length:11|regex:mobile', 'phone' => 'max:255', 'email' => 'require|email', 'register_address' => 'require|max:255', 'business_license' => 'max:255', 'register_capital' => 'require|number', 'license_scan' => 'require', 'mailing_address' => 'max:255', 'sales_volume' => 'max:255', 'total_people' => 'number', 'developer_people' => 'number', 'patent' => 'max:255', 'high_technology' => 'require|number', 'service_direction'=> 'max:255', 'products_introduce' => 'min:300', 'business_introduce' => 'min:30', 'logo' => 'require'],
-        'detail'            => ['id' => '加速器主键']
+        'save'   => ['id' => 'number', 'company' => 'require|max:255', 'industry' => 'max:255', 'duty' => 'max:255', 'mobile' => 'require|length:11|regex:mobile', 'email' => 'require|email'],
+        'detail'            => ['id' => 'require|number']
     ];
 
 }

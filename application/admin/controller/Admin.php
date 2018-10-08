@@ -506,7 +506,7 @@ class Admin extends BasisController {
         } else {
             return json([
                 'code'          => '404',
-                'message'       => '获取角色列表成功'
+                'message'       => '获取角色列表失败'
             ]);
         }
     }
@@ -562,8 +562,7 @@ class Admin extends BasisController {
 
         //获取Session中的数据
         $admin = Session::get('admin');
-        /*$id = $admin['id'];*/
-        $id = 1;
+        $id = $admin['id'];
 
         //返回数据
         if ($id) {
