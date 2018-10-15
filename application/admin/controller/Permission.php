@@ -17,35 +17,19 @@ use gmars\rbac\Rbac;
 
 class Permission extends BasisController {
 
-    /**
-     * 声明权限模型
-     * @var
-     */
+    /* 声明权限模型 */
     protected $permission_model;
 
-    /**
-     * 声明用户角色模型
-     * @var
-     */
+    /* 声明用户角色模型 */
     protected $admin_role_model;
 
-    /**
-     * 声明权限验证器
-     * @var
-     */
+    /* 声明权限验证器 */
     protected $permission_validate;
 
-    /**
-     * 声明权限分页器
-     * @var
-     */
+    /* 声明权限分页器 */
     protected $permission_page;
 
-    /**
-     * 默认的构造函数
-     * Permission constructor.
-     * @param Request|null $request
-     */
+    /* 声明默认构造函数 */
     public function __construct(Request $request = null) {
         parent::__construct($request);
         $this->permission_model = new PermissionModel();
@@ -54,9 +38,7 @@ class Permission extends BasisController {
         $this->permission_page = config('pagination');
     }
 
-    /**
-     * 获得权限节点api接口
-     */
+    /* 生成节点*/
     public function node() {
         //获得权限节点
         $admin = Session::get('admin');
@@ -80,11 +62,7 @@ class Permission extends BasisController {
         ]);
     }
 
-    /**
-     * 权限列表api接口
-     * @return \think\response\Json
-     * @throws \think\exception\DbException
-     */
+    /* 权限列表 */
     public function entry() {
         /* 获取客户端提供的数据 */
         $id = request()->param('id');

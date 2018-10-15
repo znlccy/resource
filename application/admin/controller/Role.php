@@ -407,12 +407,6 @@ class Role extends BasisController {
     }
 
     /**
-     * 生成树结构
-     * @param $data
-     * @param $pId
-     * @return array
-     */
-    /**
      * 生成树结构函数
      * @param $data
      * @param $pId
